@@ -1,21 +1,19 @@
 <?php
 namespace LeePHP\IO;
 
-use LeePHP\Base\Base;
-use LeePHP\Bootstrap;
 use LeePHP\Entity\ShellResult;
 use LeePHP\NetworkException;
 use LeePHP\PermissionException;
 use LeePHP\Utility\Console;
 
 /**
- * Shell 命令行工具辅助类。
+ * Shell 命令行辅助工具类。
  *
  * @author Lei Lee <web.developer.network@gmail.com>
- * @version 1.0.0
- * @copyright (c) 2013, Lei Lee
+ * @version 1.1.0
+ * @copyright (c) 2013-2014, Lei Lee
  */
-class Shell extends Base {
+class Shell {
     /**
      * Linux Shell 会话对象。
      *
@@ -31,21 +29,35 @@ class Shell extends Base {
     private $shell_ok = false;
 
     /**
+     * 指示是否输出操作明细？
+     *
+     * @var boolean
+     */
+    private $_verbose = false;
+
+    /**
      * 静态创建 Shell 对象实例。
      * 
-     * @param Bootstrap $ctx
+     * @param boolean $verbose 指示是否输出操作详细？(默认值: False)
      * @return Shell
      */
-    static function create($ctx) {
-        return (new Shell($ctx));
+    static function create($verbose = false) {
+        return (new Shell($verbose));
+    }
+
+    /**
+     * 构造函数。
+     * 
+     * @param boolean $verbose 指示是否输出操作详细？(默认值: False)
+     */
+    function __construct($verbose = false) {
+        $this->_verbose = $verbose;
     }
 
     /**
      * 析构函数。
      */
     function __destruct() {
-        parent::__destruct();
-
         $this->shell_ok      = false;
         $this->shell_session = NULL;
     }
@@ -95,7 +107,6 @@ class Shell extends Base {
         if (!$this->shell_ok)
             throw new NetworkException('尚未连接远程主机。', -1);
 
-        // $stream = ssh2_exec($this->shell_session, $command);
         $stream = ssh2_shell($this->shell_session, "vanilla", null, 200);
 
         if (!$stream)
@@ -139,6 +150,9 @@ class Shell extends Base {
 
             if ($char != "\n") {
                 if (preg_match("/Password:/", $line)) {
+                    if ($this->_verbose)
+                        Console::info('收到 su - ' . $su_user . ' 密码提示 ...');
+
                     // Password prompt.
                     if (fputs($stream, "{$su_pass}\n{$command}\necho [end] $?\n") === false) {
                         return false;
@@ -155,6 +169,9 @@ class Shell extends Base {
                     break;
                 } else {
                     $sr->append($line);
+
+                    if ($this->_verbose)
+                        Console::info(trim($line));
                 }
 
                 $line = '';
@@ -176,6 +193,9 @@ class Shell extends Base {
         while ($line = fgets($stream, 4096)) {
             flush();
             $sr->append($line);
+
+            if ($this->_verbose)
+                Console::info(trim($line));
         }
     }
 

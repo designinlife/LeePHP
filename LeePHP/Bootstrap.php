@@ -7,12 +7,14 @@ use LeePHP\Base\WebBase;
 use LeePHP\DB\DbPdo;
 use LeePHP\Interfaces\IController;
 use LeePHP\Interfaces\IDb;
+use LeePHP\Interfaces\IPrinter;
 use LeePHP\Interfaces\IProcess;
 use LeePHP\Interfaces\ITemplate;
 use LeePHP\RuntimeException;
 use LeePHP\System\Application;
-use LeePHP\System\ParamWrapper;
+use LeePHP\System\DefPrinter;
 use LeePHP\System\Logger;
+use LeePHP\System\ParamWrapper;
 use LeePHP\Template\TemplateFactory;
 use LeePHP\Utility\Console;
 
@@ -242,6 +244,13 @@ class Bootstrap {
     public $logger;
 
     /**
+     * IPrinter 数据输出对象。
+     *
+     * @var IPrinter
+     */
+    public $dp;
+
+    /**
      * 请求调度。
      * 
      * @param array $argv    指定 CLI 模式运行时的命令行参数集合。
@@ -268,6 +277,7 @@ class Bootstrap {
         error_reporting($this->_errorLevel);
         set_error_handler(array($this, 'defErrorHandler'), $this->_errorLevel);
         set_exception_handler(array($this, 'defExceptionHandler'));
+        register_shutdown_function(array($this, 'dispose'));
 
         // 解析系统配置 INI 文件
         if (is_array($this->_iniFiles)) {
@@ -333,6 +343,9 @@ class Bootstrap {
             if (!method_exists($this->_c_instance, $cls_func))
                 throw new RuntimeException('控制器方法 ' . $cls_name . '::' . $cls_func . '() 尚未定义。', -1);
 
+            // 初始化 IPrinter 对象 ...
+            $this->dp = new DefPrinter($this);
+
             $this->_c_instance->$cls_func();
         } else {
             if (!($this->_c_instance instanceof ProcessBase))
@@ -344,6 +357,20 @@ class Bootstrap {
         }
 
         $this->_c_instance->dispose();
+    }
+
+    /**
+     * [Event] Shutdown 事件回调。
+     */
+    function dispose() {
+        $this->dp       = NULL;
+        $this->dw       = NULL;
+        $this->template = NULL;
+
+        if ($this->db) {
+            $this->db->close();
+            $this->db = NULL;
+        }
     }
 
     /**

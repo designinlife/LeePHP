@@ -1,7 +1,10 @@
 <?php
 namespace LeePHP\Base;
 
+use LeePHP\Bootstrap;
 use LeePHP\Interfaces\IController;
+use LeePHP\Interfaces\IPrinter;
+use LeePHP\Interfaces\ITemplate;
 use LeePHP\System\ParamWrapper;
 
 /**
@@ -24,18 +27,34 @@ class WebBase extends Base implements IController {
      *
      * @var ParamWrapper
      */
-    protected $data;
+    protected $dw;
+
+    /**
+     * IPrinter 数据打印对象。
+     *
+     * @var IPrinter
+     */
+    protected $dp;
+
+    /**
+     * ITemplate 模版对象。
+     *
+     * @var ITemplate
+     */
+    protected $template;
 
     /**
      * 构造函数。
      * 
-     * @param \LeePHP\Bootstrap $ctx
+     * @param Bootstrap $ctx
      */
     function __construct($ctx) {
         parent::__construct($ctx);
 
-        $this->isPost = (0 === strcmp($_SERVER['REQUEST_METHOD'], 'POST'));
-        $this->data   = $this->ctx->dw;
+        $this->isPost   = (0 === strcmp($_SERVER['REQUEST_METHOD'], 'POST'));
+        $this->dw       = $this->ctx->dw;
+        $this->dp       = $this->ctx->dp;
+        $this->template = $this->ctx->template;
 
         $this->ctx->template->assign('cfgs', $this->ctx->cfgs);
     }
@@ -46,14 +65,14 @@ class WebBase extends Base implements IController {
     function __destruct() {
         parent::__destruct();
 
-        unset($this->data);
+        unset($this->dw, $this->dp, $this->template);
     }
 
     /**
      * 预初始化事件。(注: 此方法在 initialize() 之前调用)
      */
     function onPreInit() {
-        $this->ctx->template->assign('cfgs', $this->ctx->cfgs);
+        
     }
 
     /**

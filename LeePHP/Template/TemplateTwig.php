@@ -99,7 +99,7 @@ class TemplateTwig extends Base implements ITemplate, IDisposable {
         $this->data['cfgs']  = &$this->ctx->cfgs;
         $this->data['gets']  = &$this->ctx->dw->gets;
         $this->data['posts'] = &$this->ctx->dw->posts;
-        $this->data['env']   = $_SERVER;
+        $this->data['env']   = &$_SERVER;
 
         if ($tpl_data && is_array($tpl_data))
             $this->data = array_merge($this->data, $tpl_data);
