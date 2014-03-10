@@ -46,7 +46,7 @@ class DbTree {
      */
     static function instance($ctx, $table, $primary, $lft = 'lft', $rgt = 'rgt', $depth = 'depth') {
         if (!self::$instance)
-            self::$instance = new DbTree($ctx, $table, $lft, $rgt, $depth);
+            self::$instance = new DbTree($ctx, $table, $primary, $lft, $rgt, $depth);
 
         return self::$instance;
     }
@@ -100,12 +100,14 @@ class DbTree {
 
         $fields = array();
         $vars   = array();
+        $vals   = array();
         foreach ($data as $key => $value) {
             $fields[] = "`" . $key . "`";
             $vars[]   = '?';
+            $vals[]   = $value;
         }
 
-        $auto_id = ( int ) $this->ctx->db->execute("INSERT INTO `" . $this->_tableName . "` (" . implode(', ', $fields) . ") VALUES(" . implode(', ', $vars) . ")", array_values($data), DbPdo::SQL_TYPE_INSERT);
+        $auto_id = ( int ) $this->ctx->db->execute("INSERT INTO `" . $this->_tableName . "` (" . implode(', ', $fields) . ") VALUES(" . implode(', ', $vars) . ")", $vals, DbPdo::SQL_TYPE_INSERT);
 
         return $auto_id;
     }
@@ -240,12 +242,15 @@ class DbTree {
             ( int ) $id
         ));
         if ($data) {
-            return array(
-                ( int ) $data[$this->_lftName],
-                ( int ) $data[$this->_rgtName],
-                ( int ) $data[$this->_depthName]
-            );
+            $d = array();
+
+            $d[] = ( int ) $data[$this->_lftName];
+            $d[] = ( int ) $data[$this->_rgtName];
+            $d[] = ( int ) $data[$this->_depthName];
+
+            return $d;
         }
+
         return false;
     }
 }
