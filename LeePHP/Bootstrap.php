@@ -319,14 +319,16 @@ class Bootstrap {
 
             // 实例化模版对象
             $this->template = TemplateFactory::create($this, $this->_templateEngine);
-
-            if (!isset($cmd_map[$this->cmd_id]))
-                throw new RuntimeException('无效的命令编号。', -1);
             
-            $this->cmd_data = $cmd_map[$this->cmd_id];
+            if (isset($cmd_map[$this->cmd_id])) {
+                $this->cmd_data = $cmd_map[$this->cmd_id];
 
-            $cls_name = $this->_controllerNs . '\\' . $this->cmd_data[0];
-            $cls_func = $this->cmd_data[1];
+                $cls_name = $this->_controllerNs . '\\' . $this->cmd_data[0];
+                $cls_func = $this->cmd_data[1];
+            } else {
+                $cls_name = $this->_controllerNs . '\\' . $this->_defaultControllerName;
+                $cls_func = 'index';
+            }
         } else {
             Console::initialize($this);
 
