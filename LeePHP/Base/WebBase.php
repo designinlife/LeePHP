@@ -90,6 +90,28 @@ class WebBase extends Base implements IController {
     }
 
     /**
+     * 模版变量赋值。
+     * 
+     * @param string $tpl_var
+     * @param mixed $values
+     */
+    function assign($tpl_var, $values) {
+        $this->template->assign($tpl_var, $values);
+    }
+
+    /**
+     * 打印 PHP 模版输出。
+     * 
+     * @param string  $tpl_file 指定模版文件相对路径。
+     * @param array   $tpl_data 指定扩展输出的数据集合。(默认值: Null)
+     * @param boolean $exitable 指示是否终止进程？(默认值: True)
+     * @return void
+     */
+    function display($tpl_file, $tpl_data = NULL, $exitable = true) {
+        $this->template->display($tpl_file, $tpl_data, $exitable);
+    }
+
+    /**
      * 跳转到上一页。
      */
     function referer() {

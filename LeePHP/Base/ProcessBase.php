@@ -4,6 +4,7 @@ namespace LeePHP\Base;
 use LeePHP\Base\Base;
 use LeePHP\Bootstrap;
 use LeePHP\OptionKit\GetOptionKit;
+use LeePHP\System\Application;
 
 /**
  * 进程控制器基类。
@@ -47,8 +48,10 @@ class ProcessBase extends Base {
 
         $help = $this->opt->get('help');
 
-        if (true === $help)
+        if (true === $help) {
             $this->opt->printOptions();
+            Application::bye();
+        }
     }
 
     /**

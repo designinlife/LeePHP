@@ -2,7 +2,7 @@
 namespace LeePHP;
 
 class BaseException extends \Exception {}
-class RuntimeException extends BaseException {}
+class DataException extends BaseException {}
 class IOException extends BaseException {}
 class ArgumentException extends BaseException {}
 class DbException extends BaseException {}
