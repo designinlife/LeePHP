@@ -36,10 +36,15 @@ class DbTree {
     /**
      * 静态创建 DbTree (Singleton) 对象实例。
      * 
-     * @param Bootstrap $ctx
+     * @param Bootstrap $ctx  指定 Bootstrap 上下文对象。
+     * @param string $table   指定表名称。
+     * @param string $primary 指定表主键字段名称。
+     * @param string $lft
+     * @param string $rgt
+     * @param string $depth
      * @return DbTree
      */
-    static function instance($ctx, $table, $lft = 'lft', $rgt = 'rgt', $depth = 'depth') {
+    static function instance($ctx, $table, $primary, $lft = 'lft', $rgt = 'rgt', $depth = 'depth') {
         if (!self::$instance)
             self::$instance = new DbTree($ctx, $table, $lft, $rgt, $depth);
 
@@ -49,18 +54,20 @@ class DbTree {
     /**
      * 构造函数。
      * 
-     * @param Bootstrap $ctx
-     * @param string $table
+     * @param Bootstrap $ctx  指定 Bootstrap 上下文对象。
+     * @param string $table   指定表名称。
+     * @param string $primary 指定表主键字段名称。
      * @param string $lft
      * @param string $rgt
      * @param string $depth
      */
-    function __construct($ctx, $table, $lft = 'lft', $rgt = 'rgt', $depth = 'depth') {
-        $this->ctx        = $ctx;
-        $this->_tableName = $table;
-        $this->_lftName   = $lft;
-        $this->_rgtName   = $rgt;
-        $this->_depthName = $depth;
+    function __construct($ctx, $table, $primary, $lft = 'lft', $rgt = 'rgt', $depth = 'depth') {
+        $this->ctx          = $ctx;
+        $this->_tableName   = $table;
+        $this->_primaryName = $primary;
+        $this->_lftName     = $lft;
+        $this->_rgtName     = $rgt;
+        $this->_depthName   = $depth;
     }
 
     /**
@@ -71,11 +78,11 @@ class DbTree {
     }
 
     /**
-     * Create a new node.
+     * 创建一个新节点。
      *
-     * @param int $id
-     * @param array $data
-     * @return int
+     * @param int $id     指定父级节点 ID。
+     * @param array $data 指定其它字段信息。
+     * @return int        返回 LAST_INSERT_ID() 值。
      */
     function create($id, $data = array()) {
         $dNode = $this->getNodeInfo($id);
@@ -98,9 +105,9 @@ class DbTree {
             $vars[]   = '?';
         }
 
-        $inst_id = ( int ) $this->ctx->db->execute("INSERT INTO `" . $this->_tableName . "` (" . implode(', ', $fields) . ") VALUES(" . implode(', ', $vars) . ")", array_values($data), DbPdo::SQL_TYPE_INSERT);
+        $auto_id = ( int ) $this->ctx->db->execute("INSERT INTO `" . $this->_tableName . "` (" . implode(', ', $fields) . ") VALUES(" . implode(', ', $vars) . ")", array_values($data), DbPdo::SQL_TYPE_INSERT);
 
-        return $inst_id;
+        return $auto_id;
     }
 
     /**
